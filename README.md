@@ -28,3 +28,7 @@ flowchart LR
     markdown --> newLines
 
 ```
+
+Add some code to add an image for sipoc diagram.
+![My image](folder/sipoc.jpg)
+
