@@ -6,4 +6,5 @@ library(credentials)
 credentials::set_github_pat()
 
 gert::git_add("cimmit.R")
-gert::git_commit_all(".")
+gert::git_commit_all
+file.exists("code.R") 
