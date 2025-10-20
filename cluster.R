@@ -12,3 +12,4 @@ gert::git_add(dir(all.files = TRUE)) # select any and all new files created or e
 gert::git_commit_all("my first commit") # save your record of file edits - called a commit
 
 gert::git_push() # push your commit to GitHub
+
