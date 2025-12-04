@@ -88,8 +88,6 @@ Or simply click **“Run App”** in RStudio with `shinyapp.R` open.
 
 ## 🖼 Dashboard Screenshots
 
-> 把下面的图片路径换成你真实的文件名，比如放在 `docs/` 下面。
-
 ### 🗺️ Station Map Tab
 
 ![Station Map](iShot_2025-12-03_22.49.32.png)
@@ -213,7 +211,7 @@ This is useful for reporting, prioritization, and communicating results to stake
     * `MR` – moving range
     * `UCL_X`, `LCL_X` – X-chart control limits
 
-### 🧠 SPC Logic (简要)
+### 🧠 SPC Logic
 
 1. Use historical (pre-policy) data to estimate:
 
@@ -258,6 +256,5 @@ Special thanks to:
 
 * NYC MTA for making ridership data publicly available
 * Cornell **Six Sigma / SPC** teaching team for guidance, especially Prof. Tim
-![Plots](tim.png)
 * Classmates and reviewers who provided feedback on our dashboard design
-
+![Plots](tim.png)
