@@ -21,3 +21,17 @@ The dashboard provides:
 
 ## 📂 Repository Structure
 
+NYC-Subway-SPC/
+│
+├── shinyapp.R # Main Shiny dashboard code
+│
+├── sixsigma_pre/ # Input data for SPC + mapping
+│ ├── stationsmap.csv # Station attributes + loss data + type classification
+│ ├── all_region.csv # Borough-level SPC metrics (ridership, MR, UCL, LCL)
+│ └── control_tests.png # SPC 8-rule reference figure
+│
+├── docs/ # Optional: documentation, images, report
+│ ├── report.pdf # Project report (if included)
+│ └── presentation.pptx # Final slides (if included)
+│
+└── README.md # Project summary (this file)
