@@ -1,34 +1,23 @@
-# 5151allabouta
-For groupA's project: congesting price in 5151 6sigma (2025)
-### Heading 3
-mutiple choice
--bullet points
-1. lay
-2. lazy
-3. 
-make a code chunck
-```r
-library(dplyr)
-# This is my new code for R
-print("hello wellwellwell")
-```
+# 🚇 NYC Subway Ridership SPC Dashboard  
+### _Statistical Process Control (SPC) Analysis of Congestion Pricing Impacts Across NYC Boroughs_
 
-### Mermaid diagrams in Github
-```mermaid
+![Header](docs/banner.png) <!-- optional: delete if no image -->
+
 ---
-config:
-  flowchart:
-    htmlLabels: false
+
+## 📌 Overview
+
+This repository contains the full Shiny dashboard developed for analyzing **NYC subway ridership changes** surrounding the introduction of **Congestion Pricing**.  
+Using **Statistical Process Control (SPC)** methods (X-charts and Moving-Range charts), we evaluate how monthly ridership in **Manhattan, Brooklyn, Queens, and the Bronx** deviates from historical patterns.
+
+The dashboard provides:
+- 🗺️ **Interactive station-level map**  
+- 📈 **Borough-level SPC control charts (plotly interactive X chart + MR chart)**  
+- 📋 **Station classifications: Core / Secondary / Stable**  
+- 🧮 **Loss estimation** related to ridership deviations  
+- 📄 **Documentation of methodology and project background**
+
 ---
-flowchart LR
-    markdown["`This **is** _Markdown_`"]
-    newLines["`Line1
-    Line 2
-    Line 3`"]
-    markdown --> newLines
 
-```
-
-Add some code to add an image for sipoc diagram.
-![My image](folder/sipoc.jpg)
+## 📂 Repository Structure
 
