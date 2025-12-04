@@ -37,8 +37,6 @@ This dashboard was developed as part of a **Six Sigma / SPC course** in the Corn
 
 ## 📂 Repository Structure
 
-> 如果你暂时没有 `docs/` 文件夹或某些文件，可以先删掉相应节点或稍后补上。
-
 ```mermaid
 graph TD
   A[NYC-Subway-SPC/] --> B[shinyapp.R - Shiny dashboard]
@@ -94,11 +92,11 @@ Or simply click **“Run App”** in RStudio with `shinyapp.R` open.
 
 ### 🗺️ Station Map Tab
 
-![Station Map](docs/screenshot_station_map.png)
+![Station Map](iShot_2025-12-03_22.49.32.png)
 
 ### 📈 Region Plots (SPC Charts) Tab
 
-![Region Plots](docs/screenshot_region_plots.png)
+![Region Plots](iShot_2025-12-03_22.49.45.png)
 
 ---
 
