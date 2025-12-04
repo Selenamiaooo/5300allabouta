@@ -37,6 +37,7 @@ This dashboard was developed as part of a Six Sigma / SPC course in the Cornell 
 
 ## 📂 Repository Structure
 
+```mermaid
 graph TD
   A[NYC-Subway-SPC/] --> B[shinyapp.R - Shiny dashboard]
   A --> C[sixsigma_pre/]
