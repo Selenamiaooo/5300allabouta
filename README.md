@@ -37,23 +37,17 @@ This dashboard was developed as part of a Six Sigma / SPC course in the Cornell 
 
 ## 📂 Repository Structure
 
-> ✅ 下面用 **Mermaid 图** 展示目录结构，GitHub 会自动渲染成图片风格。
-> 如果你暂时没有 `docs/` 文件夹，可以先删掉对应节点，或者之后补上。
-
-```mermaid
 graph TD
-  A[NYC-Subway-SPC/] --> B[shinyapp.R<br/>(Shiny dashboard)]
+  A[NYC-Subway-SPC/] --> B[shinyapp.R - Shiny dashboard]
   A --> C[sixsigma_pre/]
-  C --> C1[stationsmap.csv<br/>(station map + loss + type)]
-  C --> C2[all_region.csv<br/>(borough SPC metrics)]
-  C --> C3[control_tests.png<br/>(8 SPC rules figure)]
+  C --> C1[stationsmap.csv - station map + loss + type]
+  C --> C2[all_region.csv - borough SPC metrics]
+  C --> C3[control_tests.png - 8 SPC rules figure]
   A --> D[docs/]
   D --> D1[report.pdf]
   D --> D2[presentation.pptx]
-  A --> E[README.md]
-```
+  A --> E[README.md - project summary]
 
-如果 GitHub 页面上这段没有变成图，而只是文本，说明仓库没开 Mermaid 支持（大概率已经开了），但老师那边一般是开着的。
 
 ---
 
