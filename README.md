@@ -34,7 +34,6 @@ Our goal is to:
 This dashboard was developed as part of a Six Sigma / SPC course in the Cornell Systems Engineering program.
 
 ---
-
 ## 📂 Repository Structure
 
 ```mermaid
