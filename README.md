@@ -1,7 +1,7 @@
 
 # 🚇 NYC Subway Ridership SPC Dashboard
 
-### 📊 Statistical Process Control Analysis of Subway Ridership under NYC Congestion Pricing
+### 📊 Statistical Process Control Analysis under NYC Congestion Pricing
 
 ---
 
@@ -24,17 +24,20 @@ The dashboard includes:
 ## 🏙 Project Motivation & Context
 
 NYC’s proposed **congestion pricing** policy is expected to shift travel behavior from private cars to public transit.
-Our goal is to:
+Our goals are to:
 
 * Quantify how subway ridership changes by **borough and month**
-* Use **SPC** to distinguish normal random fluctuation from **special-cause variation**
+* Use **SPC** to separate normal random fluctuation from **special-cause variation**
 * Identify **priority stations** where ridership shifts translate into large financial impact
-* Provide a **visual decision support tool** for policy discussion and system planning
+* Provide a **visual decision-support tool** for policy discussion and system planning
 
-This dashboard was developed as part of a Six Sigma / SPC course in the Cornell Systems Engineering program.
+This dashboard was developed as part of a **Six Sigma / SPC course** in the Cornell Systems Engineering program.
 
 ---
+
 ## 📂 Repository Structure
+
+> 如果你暂时没有 `docs/` 文件夹或某些文件，可以先删掉相应节点或稍后补上。
 
 ```mermaid
 graph TD
@@ -47,7 +50,7 @@ graph TD
   D --> D1[report.pdf]
   D --> D2[presentation.pptx]
   A --> E[README.md - project summary]
-
+```
 
 ---
 
@@ -58,6 +61,8 @@ graph TD
 ```bash
 git clone https://github.com/YOUR_GROUP_NAME/YOUR_REPO.git
 ```
+
+*(Replace `YOUR_GROUP_NAME` and `YOUR_REPO` with your actual GitHub path.)*
 
 ### 2️⃣ Install required R packages
 
@@ -79,14 +84,13 @@ install.packages(c(
 shiny::runApp("shinyapp.R")
 ```
 
-or simply click **“Run App”** in RStudio with `shinyapp.R` open.
+Or simply click **“Run App”** in RStudio with `shinyapp.R` open.
 
 ---
 
 ## 🖼 Dashboard Screenshots
 
-> 🔁 把下面这些路径换成你自己放在 `docs/` 里的截图文件名，例如
-> `docs/dashboard_overview.png`、`docs/station_map.png` 等。
+> 把下面的图片路径换成你真实的文件名，比如放在 `docs/` 下面。
 
 ### 🗺️ Station Map Tab
 
@@ -135,12 +139,13 @@ The **Region Plots** tab uses `all_region.csv` to build **borough-level time ser
   * 🔺 *Above UCL*
   * 🔻 *Below LCL*
   * ⚪ *Within limits*
-* Plotly hover tooltip shows:
 
-  * Borough
-  * Month
-  * Total ridership (formatted)
-  * Status (Above UCL / Below LCL / Within limits)
+Plotly hover tooltip shows:
+
+* Borough
+* Month
+* Total ridership (formatted with commas)
+* Status (Above UCL / Below LCL / Within limits)
 
 #### 🔹 MR-Chart – Month-to-Month Change
 
@@ -154,7 +159,11 @@ The **Region Plots** tab uses `all_region.csv` to build **borough-level time ser
 
   * MR values over time
   * Mean MR
-  * MR control limit `UCL(MR) = 3.268 × mean(MR)` (for n = 2)
+  * MR control limit
+
+    [
+    UCL(MR) = 3.268 \times \overline{MR} \quad (n = 2)
+    ]
 
 * Hover tooltip shows:
 
@@ -174,9 +183,9 @@ In the **Region Plots** tab, switch the outcome to **“Station List”** to:
   * 🔴 Core stations
   * 🟠 Secondary stations
   * ⚪ Stable stations
-* View a clean, ordered table of station complexes in that category.
+* View a clean, ordered table of station complexes in that category
 
-This is useful for reporting and prioritization.
+This is useful for reporting, prioritization, and communicating results to stakeholders.
 
 ---
 
@@ -184,41 +193,47 @@ This is useful for reporting and prioritization.
 
 ### 📁 Data
 
-* **`stationsmap.csv`**
+* **`sixsigma_pre/stationsmap.csv`**
 
-  * One row per station complex
-  * Columns include: borough, priority (Core / Secondary / Stable), loss, longitude, latitude
+  * One row per **station complex**
+  * Example fields:
 
-* **`all_region.csv`**
+    * `borough`
+    * `station_complex`
+    * `priority` (Core / Secondary / Stable)
+    * `loss` (estimated ridership / revenue loss)
+    * `Longitude`, `Latitude`
 
-  * One row per borough–month
-  * Columns include:
+* **`sixsigma_pre/all_region.csv`**
 
-    * `region` – borough name
+  * One row per **borough–month**
+  * Example fields:
+
+    * `region` – borough name (Manhattan, Brooklyn, Queens, Bronx)
     * `month` – label like `"Jan-24"`
-    * `total_ridership` – monthly ridership total
+    * `total_ridership` – total monthly ridership
     * `MR` – moving range
-    * `UCL_X`, `LCL_X` – 2σ-based X-chart limits
+    * `UCL_X`, `LCL_X` – X-chart control limits
 
 ### 🧠 SPC Logic (简要)
 
 1. Use historical (pre-policy) data to estimate:
 
    * Process center (mean ridership)
-   * MR-based estimate of σ
-2. Construct **2σ and 3σ** control limits for X-charts.
-3. Apply SPC rules (8 visual rules reference in `control_tests.png`).
-4. Classify stations:
+   * MR-based estimate of variability
+2. Construct **2σ** control limits for X-charts from MR estimates.
+3. Apply SPC visual rules (see `control_tests.png` for the 8-rule reference).
+4. Classify stations based on rule violations:
 
    * 🔴 **Core** – violates both 2σ and 3σ rules
    * 🟠 **Secondary** – violates only 2σ rules
-   * ⚪ **Stable** – no violations
+   * ⚪ **Stable** – no SPC rule violations
 
 ### 💰 Loss Estimation
 
-* Compute ridership loss as deviation **below** the lower control limit
-* Multiply by assumed revenue per rider (fare) to estimate monthly dollar loss
-* Aggregate by borough and station type to summarize impact
+* Compute ridership loss as deviation **below** the lower control limit or baseline
+* Convert ridership loss to dollar loss using assumed fare per rider
+* Aggregate loss by **borough** and **station type** for summary statistics
 
 ---
 
@@ -234,7 +249,7 @@ This is useful for reporting and prioritization.
 
 ## 📜 License
 
-This project is created for academic coursework and educational purposes within the Cornell Systems Engineering program.
+This project is created for **academic coursework and educational purposes** within the Cornell Systems Engineering program.
 Please contact the authors if you plan to reuse, extend, or publish results from this work.
 
 ---
@@ -246,3 +261,4 @@ Special thanks to:
 * NYC MTA for making ridership data publicly available
 * Cornell **Six Sigma / SPC** teaching team for guidance
 * Classmates and reviewers who provided feedback on our dashboard design
+
