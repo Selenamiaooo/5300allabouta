@@ -1,13 +1,7 @@
-哈哈那我懂了 😎
-我给你重新做一个**专业 + 漂亮 + 带 emoji 的 GitHub README**，风格更现代、视觉更强，你们交作业、展示项目的时候会更亮眼。
-
-下面这份 **可以直接复制当 README.md 内容**，完全不会乱码。
-
----
 
 # 🚇 NYC Subway Ridership SPC Dashboard
 
-### 📊 *Statistical Process Control Analysis of Subway Ridership under NYC Congestion Pricing*
+### 📊 Statistical Process Control Analysis of Subway Ridership under NYC Congestion Pricing
 
 ---
 
@@ -19,166 +13,242 @@ Using **SPC (Statistical Process Control)** techniques, including **X-charts** a
 
 The dashboard includes:
 
-* 🗺️ **Interactive subway station map**
-* 📈 **Borough-level SPC charts (hover-enabled Plotly)**
-* 🚦 **Station classification: Core / Secondary / Stable**
-* 💸 **Ridership loss and financial impact estimations**
-* 📚 **Documentation of assumptions and SPC methodology**
+* 🗺️ Interactive **subway station map**
+* 📈 Borough-level **SPC control charts** (hover-enabled Plotly X chart + MR chart)
+* 🚦 Station classification: **Core / Secondary / Stable**
+* 💸 Ridership loss and **financial impact estimates**
+* 📚 Documentation of assumptions and SPC methodology
 
 ---
 
-## 📁 Repository Structure
+## 🏙 Project Motivation & Context
 
-```
-NYC-Subway-SPC/
-│
-├── shinyapp.R                     # Main Shiny dashboard
-│
-├── sixsigma_pre/                  # Input data for SPC + station map
-│   ├── stationsmap.csv            # Station-level classification + loss values
-│   ├── all region.csv             # Borough-level SPC metrics
-│   └── control_tests.png          # Reference for 8 SPC rules
-│
-├── docs/                          # (Optional) Project report, slides, images
-│   ├── report.pdf
-│   └── presentation.pptx
-│
-└── README.md                      # Project summary
-```
+NYC’s proposed **congestion pricing** policy is expected to shift travel behavior from private cars to public transit.
+Our goal is to:
+
+* Quantify how subway ridership changes by **borough and month**
+* Use **SPC** to distinguish normal random fluctuation from **special-cause variation**
+* Identify **priority stations** where ridership shifts translate into large financial impact
+* Provide a **visual decision support tool** for policy discussion and system planning
+
+This dashboard was developed as part of a Six Sigma / SPC course in the Cornell Systems Engineering program.
 
 ---
 
-## 🚀 How to Run the App Locally
+## 📂 Repository Structure
 
-### **1️⃣ Clone the repository**
+> ✅ 下面用 **Mermaid 图** 展示目录结构，GitHub 会自动渲染成图片风格。
+> 如果你暂时没有 `docs/` 文件夹，可以先删掉对应节点，或者之后补上。
+
+```mermaid
+graph TD
+  A[NYC-Subway-SPC/] --> B[shinyapp.R<br/>(Shiny dashboard)]
+  A --> C[sixsigma_pre/]
+  C --> C1[stationsmap.csv<br/>(station map + loss + type)]
+  C --> C2[all_region.csv<br/>(borough SPC metrics)]
+  C --> C3[control_tests.png<br/>(8 SPC rules figure)]
+  A --> D[docs/]
+  D --> D1[report.pdf]
+  D --> D2[presentation.pptx]
+  A --> E[README.md]
+```
+
+如果 GitHub 页面上这段没有变成图，而只是文本，说明仓库没开 Mermaid 支持（大概率已经开了），但老师那边一般是开着的。
+
+---
+
+## 🖥 How to Run the Shiny App
+
+### 1️⃣ Clone or download the repository
 
 ```bash
 git clone https://github.com/YOUR_GROUP_NAME/YOUR_REPO.git
 ```
 
-### **2️⃣ Install required R packages**
+### 2️⃣ Install required R packages
 
 ```r
 install.packages(c(
-  "shiny", "leaflet", "dplyr", "readr",
-  "scales", "ggplot2", "plotly"
+  "shiny",
+  "leaflet",
+  "dplyr",
+  "readr",
+  "scales",
+  "ggplot2",
+  "plotly"
 ))
 ```
 
-### **3️⃣ Run the dashboard**
+### 3️⃣ Run the app in R / RStudio
 
 ```r
 shiny::runApp("shinyapp.R")
 ```
 
+or simply click **“Run App”** in RStudio with `shinyapp.R` open.
+
+---
+
+## 🖼 Dashboard Screenshots
+
+> 🔁 把下面这些路径换成你自己放在 `docs/` 里的截图文件名，例如
+> `docs/dashboard_overview.png`、`docs/station_map.png` 等。
+
+### 🗺️ Station Map Tab
+
+![Station Map](docs/screenshot_station_map.png)
+
+### 📈 Region Plots (SPC Charts) Tab
+
+![Region Plots](docs/screenshot_region_plots.png)
+
 ---
 
 ## 🌐 Dashboard Features
 
-### 🗺️ **1. Station Map (Interactive)**
+### 1. 🗺️ Station Map (Borough View)
 
-* Visualizes all NYC subway stations in the selected borough
+* Visualizes all subway **station complexes** in the selected borough
 * Stations are categorized as:
 
-  * 🔴 **Core** (violates both 2σ and 3σ rules)
-  * 🟠 **Secondary** (violates 2σ only)
-  * ⚪ **Stable** (no violations)
-* Hover tooltips show:
+  * 🔴 **Core** – violates both 2σ and 3σ SPC rules
+  * 🟠 **Secondary** – violates 2σ rules only
+  * ⚪ **Stable** – no SPC rule violations
+* Hover tooltip shows:
 
-  * Station complex
+  * Station complex name
   * Borough
-  * Station type
-  * Loss estimate
+  * Station type (Core / Secondary / Stable)
+  * Estimated loss value
 
 ---
 
-### 📈 **2. Borough-Level SPC Charts**
+### 2. 📈 Borough-Level SPC Charts
 
-#### **X-Chart – Total Monthly Ridership**
+The **Region Plots** tab uses `all_region.csv` to build **borough-level time series SPC charts**.
 
-* Interactive hover tooltips
-* Flags values:
+#### 🔹 X-Chart – Total Monthly Ridership
 
-  * 🔺 Above UCL (Upper Control Limit)
-  * 🔻 Below LCL (Lower Control Limit)
-  * ⚪ Within limits
-* Shows trends and sudden shifts in ridership
+* Y-axis: total monthly ridership for the selected borough
+* X-axis: month (e.g., Jan-24, Feb-24, …)
+* Center line: mean monthly ridership
+* Control limits:
 
-#### **MR-Chart – Month-to-Month Variation**
+  * `UCL_X` (Upper Control Limit)
+  * `LCL_X` (Lower Control Limit)
+* Each point is classified as:
 
-* Detects sudden changes in ridership
-* Plots MR against UCL(MR) and mean MR
-* Hover tooltips provide MR values per month
+  * 🔺 *Above UCL*
+  * 🔻 *Below LCL*
+  * ⚪ *Within limits*
+* Plotly hover tooltip shows:
+
+  * Borough
+  * Month
+  * Total ridership (formatted)
+  * Status (Above UCL / Below LCL / Within limits)
+
+#### 🔹 MR-Chart – Month-to-Month Change
+
+* **Moving Range** is defined as
+
+  [
+  MR_t = |X_t - X_{t-1}|
+  ]
+
+* MR-chart shows:
+
+  * MR values over time
+  * Mean MR
+  * MR control limit `UCL(MR) = 3.268 × mean(MR)` (for n = 2)
+
+* Hover tooltip shows:
+
+  * Borough
+  * Month
+  * Moving range value
 
 ---
 
-### 🧾 **3. Station List Viewer**
+### 3. 📋 Station List Viewer
 
-Filter stations by:
+In the **Region Plots** tab, switch the outcome to **“Station List”** to:
 
-* 🔴 Core
-* 🟠 Secondary
-* ⚪ Stable
+* Filter by borough
+* Select station category:
 
-Useful for identifying priority stations and summarizing borough-level behavior.
+  * 🔴 Core stations
+  * 🟠 Secondary stations
+  * ⚪ Stable stations
+* View a clean, ordered table of station complexes in that category.
+
+This is useful for reporting and prioritization.
 
 ---
 
-## 📊 Methodology Summary
+## 📊 Data & Methodology
 
-### 🧮 SPC Components
+### 📁 Data
 
-* **X-chart**:
+* **`stationsmap.csv`**
 
-  * Tracks month-to-month ridership patterns
-  * UCL and LCL computed using:
+  * One row per station complex
+  * Columns include: borough, priority (Core / Secondary / Stable), loss, longitude, latitude
 
-    * Mean ridership
-    * Moving Range estimate of process variability
+* **`all_region.csv`**
 
-* **MR-chart**:
+  * One row per borough–month
+  * Columns include:
 
-  * Moving Range defined as
-    [
-    MR_t = |X_t - X_{t-1}|
-    ]
+    * `region` – borough name
+    * `month` – label like `"Jan-24"`
+    * `total_ridership` – monthly ridership total
+    * `MR` – moving range
+    * `UCL_X`, `LCL_X` – 2σ-based X-chart limits
 
-### 🚦 Station Classification Rules
+### 🧠 SPC Logic (简要)
 
-| Type             | Criteria                                  |
-| ---------------- | ----------------------------------------- |
-| 🔴 **Core**      | Out-of-control under both 2σ and 3σ rules |
-| 🟠 **Secondary** | Violates only 2σ rules                    |
-| ⚪ **Stable**     | No SPC rule violations                    |
+1. Use historical (pre-policy) data to estimate:
 
-### 💸 Loss Estimation
+   * Process center (mean ridership)
+   * MR-based estimate of σ
+2. Construct **2σ and 3σ** control limits for X-charts.
+3. Apply SPC rules (8 visual rules reference in `control_tests.png`).
+4. Classify stations:
 
-* Based on deviation from expected ridership within control limits
-* Converted to estimated revenue loss using standard fare assumptions
+   * 🔴 **Core** – violates both 2σ and 3σ rules
+   * 🟠 **Secondary** – violates only 2σ rules
+   * ⚪ **Stable** – no violations
+
+### 💰 Loss Estimation
+
+* Compute ridership loss as deviation **below** the lower control limit
+* Multiply by assumed revenue per rider (fare) to estimate monthly dollar loss
+* Aggregate by borough and station type to summarize impact
 
 ---
 
 ## 👩‍💻 Authors
 
-* **Luyao Chang – Cornell Systems Engineering '25**
-* **Yueqing Miao – Cornell Systems Engineering '26**
-* **Kegan Lin – Cornell Systems Engineering '26**
-* **Jack Zhou – Cornell Systems Engineering '26**
-* **Laura Liu – Cornell Systems Engineering '25**
+* **Luyao Chang – Cornell Systems Engineering ’25**
+* **Yueqing Miao – Cornell Systems Engineering ’26**
+* **Kegan Lin – Cornell Systems Engineering ’26**
+* **Jack Zhou – Cornell Systems Engineering ’26**
+* **Laura Liu – Cornell Systems Engineering ’25**
 
 ---
 
 ## 📜 License
 
-This repository is provided for academic and instructional purposes under Cornell University coursework.
+This project is created for academic coursework and educational purposes within the Cornell Systems Engineering program.
+Please contact the authors if you plan to reuse, extend, or publish results from this work.
 
 ---
 
 ## 🙌 Acknowledgements
 
-Thanks to:
+Special thanks to:
 
-* NYC MTA for open data
-* Cornell Professor Tim!!
-* Teammates and reviewers
-
+* NYC MTA for making ridership data publicly available
+* Cornell **Six Sigma / SPC** teaching team for guidance
+* Classmates and reviewers who provided feedback on our dashboard design
