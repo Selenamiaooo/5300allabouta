@@ -257,6 +257,7 @@ Please contact the authors if you plan to reuse, extend, or publish results from
 Special thanks to:
 
 * NYC MTA for making ridership data publicly available
-* Cornell **Six Sigma / SPC** teaching team for guidance
+* Cornell **Six Sigma / SPC** teaching team for guidance, especially Prof. Tim
+![Plots](Tim.png)
 * Classmates and reviewers who provided feedback on our dashboard design
 
