@@ -34,7 +34,8 @@ borough_choices <- sort(unique(stations$borough))
 # 1b. Load borough-level SPC data (X chart + MR chart)
 #     Expected columns: region, month, total_ridership, MR, UCL_X, LCL_X
 #---------------------------
-borough_spc_raw <- readr::read_csv("sixsigma_pre/all region.csv", show_col_types = FALSE)
+borough_spc_raw <- readr::read_csv("sixsigma_pre/all region.csv",
+                                   show_col_types = FALSE)
 
 # Trim column name whitespace
 names(borough_spc_raw) <- trimws(names(borough_spc_raw))
@@ -50,6 +51,12 @@ borough_spc <- borough_spc_raw %>%
     month_date  = as.Date(paste0("01-", month), format = "%d-%b-%y"),
     month_label = month
   )
+
+# Take the last date in the data as the last update
+last_update <- borough_spc %>%
+  summarise(last = max(month_date, na.rm = TRUE)) %>%
+  pull(last) %>%
+  format("%d %B %Y")
 
 #---------------------------
 # 2. UI
@@ -176,6 +183,7 @@ ui <- navbarPage(
       br(),
       
       h3("Data Sources & Updates"),
+      h5(last_update),
       p("The dashboard uses two major datasets:"),
       tags$ul(
         tags$li(
@@ -222,7 +230,15 @@ ui <- navbarPage(
         src   = "control_tests.png",
         style = "max-width: 100%; height: auto; margin-bottom: 10px;"
       ),
-      tags$small("Figure 1. The eight visual SPC tests used to evaluate stability and detect special-cause patterns."),
+      tags$small(
+        "Figure 1. The eight visual SPC tests used to evaluate stability and detect special-cause patterns. We cited this figure from ",
+        tags$a(
+          "Slide 11 Lesson 5",
+          href   = "https://docs.google.com/presentation/d/1d8PyyVBTx7FPnq05NzGM1_6AxN48y5EGS8bKh9p2MLw/edit?usp=sharing",
+          target = "_blank"
+        ),
+        "."
+      ),
       br(), br(),
       
       tags$ul(
@@ -350,20 +366,21 @@ server <- function(input, output, session) {
   output$n_core <- renderText({
     df <- filtered_stations()
     n  <- sum(df$priority == "Core", na.rm = TRUE)
-    paste("Core Stations:", n)
+    paste0("🔴 Core Station: ", n)
   })
   
   output$n_secondary <- renderText({
     df <- filtered_stations()
     n  <- sum(df$priority == "Secondary", na.rm = TRUE)
-    paste("Secondary Stations:", n)
+    paste0("🟠 Secondary Station: ", n)
   })
   
   output$n_stable <- renderText({
     df <- filtered_stations()
     n  <- sum(df$priority == "Stable", na.rm = TRUE)
-    paste("Stable Stations:", n)
+    paste0("⚪ Stable Station: ", n)
   })
+  
   
   output$loss_direction <- renderText({
     df <- filtered_stations()
