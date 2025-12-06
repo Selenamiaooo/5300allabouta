@@ -61,259 +61,330 @@ last_update <- borough_spc %>%
 #---------------------------
 # 2. UI
 #---------------------------
-ui <- navbarPage(
-  title = "NYC Subway Stations Tracker Dashboard",
-  id    = "mainnav",
-  
-  # ===== Tab 1: Station Map =====
-  tabPanel(
-    title = "Station Map",
-    div(
-      class = "outer",
-      
-      tags$head(
-        tags$style(HTML("
-          #controls {
-            background-color: rgba(255, 255, 255, 0.95);
-            padding: 10px 15px;
-            border-radius: 6px;
-            box-shadow: 0 0 8px rgba(0,0,0,0.3);
-            z-index: 1000;
-          }
-        "))
-      ),
-      
-      leafletOutput("map", height = "650px"),
-      
-      absolutePanel(
-        id = "controls", class = "panel panel-default",
-        top = 80, left = 20, width = 300, draggable = TRUE,
-        
-        h4("Borough Filter & Summary"),
-        
-        selectInput(
-          inputId  = "borough",
-          label    = "Borough:",
-          choices  = borough_choices,
-          selected = borough_choices[1]
-        ),
-        
-        tags$hr(),
-        h5("Station Counts (Selected Borough)"),
-        
-        textOutput("n_core"),
-        textOutput("n_secondary"),
-        textOutput("n_stable"),
-        
-        tags$br(),
-        h5("Policy Impact (loss)"),
-        
-        textOutput("loss_direction"),
-        textOutput("loss_value")
-      )
-    )
+
+ui <- tagList(
+  # 顶部横幅
+  tags$div(
+    style = "
+      background-color:#003366;
+      color:white;
+      text-align:center;
+      padding:12px;
+      font-size:24px;
+      font-weight:700;
+      letter-spacing:1px;
+    ",
+    "NYC Subway Ridership Stability Dashboard — SPC Analysis for Congestion Pricing"
   ),
   
-  # ===== Tab 2: Region Plots =====
-  tabPanel(
-    title = "Region Plots",
-    sidebarLayout(
-      sidebarPanel(
-        width = 3,
-        h4("Region settings"),
+  navbarPage(
+    title = "NYC Subway Stations Tracker Dashboard",
+    id    = "mainnav",
+    
+    # ===== Tab 1: Station Map =====
+    tabPanel(
+      title = "Station Map",
+      div(
+        class = "outer",
         
-        selectInput(
-          inputId  = "region_borough",
-          label    = "Borough:",
-          choices  = borough_choices,
-          selected = borough_choices[1]
+        tags$head(
+          tags$style(HTML("
+            #controls {
+              background-color: rgba(255, 255, 255, 0.95);
+              padding: 10px 15px;
+              border-radius: 6px;
+              box-shadow: 0 0 8px rgba(0,0,0,0.3);
+              z-index: 1000;
+            }
+            #map {
+              border-radius: 12px;
+              box-shadow: 0 2px 15px rgba(0,0,0,0.25);
+            }
+          "))
         ),
         
-        selectInput(
-          inputId  = "outcome",
-          label    = "Outcome:",
-          choices  = c("Show SPC Control Charts" = "spc",
-                       "Show Station List"       = "list"),
-          selected = "spc"
-        ),
+        leafletOutput("map", height = "650px"),
         
-        conditionalPanel(
-          condition = "input.outcome == 'list'",
+        absolutePanel(
+          id = "controls", class = "panel panel-default",
+          top = 80, left = 20, width = 300, draggable = TRUE,
+          
+          h4("Borough Filter & Summary"),
+          
           selectInput(
-            inputId = "station_type",
-            label   = "Stations:",
-            choices = c("Core stations"      = "Core",
-                        "Secondary stations" = "Secondary",
-                        "Stable stations"    = "Stable"),
-            selected = "Core"
+            inputId  = "borough",
+            label    = "Borough:",
+            choices  = borough_choices,
+            selected = borough_choices[1]
+          ),
+          
+          tags$hr(),
+          h5("Station Counts (Selected Borough)"),
+          
+          textOutput("n_core"),
+          textOutput("n_secondary"),
+          textOutput("n_stable"),
+          
+          tags$br(),
+          h5("Policy Impact (loss)"),
+          
+          textOutput("loss_direction"),
+          textOutput("loss_value")
+        )
+      )
+    ),
+    
+    # ===== Tab 2: Region Plots =====
+    tabPanel(
+      title = "Region Plots",
+      sidebarLayout(
+        sidebarPanel(
+          width = 3,
+          h4("Region settings"),
+          
+          selectInput(
+            inputId  = "region_borough",
+            label    = "Borough:",
+            choices  = borough_choices,
+            selected = borough_choices[1]
+          ),
+          
+          selectInput(
+            inputId  = "outcome",
+            label    = "Outcome:",
+            choices  = c("Show SPC Control Charts" = "spc",
+                         "Show Station List"       = "list"),
+            selected = "spc"
+          ),
+          
+          conditionalPanel(
+            condition = "input.outcome == 'list'",
+            selectInput(
+              inputId = "station_type",
+              label   = "Stations:",
+              choices = c("Core stations"      = "Core",
+                          "Secondary stations" = "Secondary",
+                          "Stable stations"    = "Stable"),
+              selected = "Core"
+            )
+          )
+        ),
+        
+        mainPanel(
+          width = 9,
+          
+          # 最新月份 summary
+          h4("Latest Month Summary"),
+          textOutput("latest_month_info"),
+          hr(),
+          
+          conditionalPanel(
+            condition = "input.outcome == 'spc'",
+            h3("SPC Control Charts by Borough"),
+            p("The X chart shows total monthly ridership; the MR chart shows month-to-month changes on a continuous time axis (2024–2025)."),
+            
+            plotlyOutput("region_x_chart", height = "330px"),
+            tags$hr(),
+            plotlyOutput("region_mr_chart", height = "330px")
+          ),
+          
+          conditionalPanel(
+            condition = "input.outcome == 'list'",
+            h3("Station list"),
+            p("Display the list of stations of the selected type within the current borough."),
+            tableOutput("station_list_table")
           )
         )
-      ),
-      
-      mainPanel(
-        width = 9,
-        
-        conditionalPanel(
-          condition = "input.outcome == 'spc'",
-          h3("SPC Control Charts by Borough"),
-          p("The X chart shows total monthly ridership; the MR chart shows month-to-month changes on a continuous time axis (2024–2025)."),
-          
-          plotlyOutput("region_x_chart", height = "330px"),
-          tags$hr(),
-          plotlyOutput("region_mr_chart", height = "330px")
-        ),
-        
-        conditionalPanel(
-          condition = "input.outcome == 'list'",
-          h3("Station list"),
-          p("Display the list of stations of the selected type within the current borough."),
-          tableOutput("station_list_table")
-        )
       )
-    )
-  ),
-  
-  # ===== Tab 3: About this site =====
-  tabPanel(
-    title = "About this site",
-    fluidPage(
-      h2("About This Dashboard"),
-      p("This dashboard provides an integrated statistical and geospatial analysis of NYC subway ridership under the context of Congestion Pricing policies. 
-       It was developed as part of the Six Sigma / SPC course at Cornell University to investigate whether ridership patterns show evidence of special-cause variation."),
-      br(),
-      
-      h3("Data Sources & Updates"),
-      h5(last_update),
-      p("The dashboard uses two major datasets:"),
-      tags$ul(
-        tags$li(
-          tags$b("Station-level dataset:"),
-          " Contains station complex names, boroughs, SPC classification (Core/Secondary/Stable), loss estimates, and coordinates. 
-         These values come from applying SPC rules on pre-policy and post-policy ridership patterns."
+    ),
+    
+    # ===== Tab 3: About this site =====
+    tabPanel(
+      title = "About this site",
+      fluidPage(
+        h2("About This Dashboard"),
+        p("This dashboard provides an integrated statistical and geospatial analysis of NYC subway ridership under the context of Congestion Pricing policies. 
+           It was developed as part of the Six Sigma / SPC course at Cornell University to investigate whether ridership patterns show evidence of special-cause variation."),
+        br(),
+        
+        h3("Data Sources & Updates"),
+        h5(last_update),
+        p("The dashboard uses two major datasets:"),
+        tags$ul(
+          tags$li(
+            tags$b("Station-level dataset:"),
+            " Contains station complex names, boroughs, SPC classification (Core/Secondary/Stable), loss estimates, and coordinates. 
+             These values come from applying SPC rules on pre-policy and post-policy ridership patterns."
+          ),
+          tags$li(
+            tags$b("Borough-level SPC dataset:"),
+            " Monthly aggregated ridership and moving range calculations from January 2024 to September 2025 for all four boroughs (Manhattan, Brooklyn, Queens, Bronx). 
+             These values are used to generate X-charts and MR-charts."
+          )
         ),
-        tags$li(
-          tags$b("Borough-level SPC dataset:"),
-          " Monthly aggregated ridership and moving range calculations from January 2024 to September 2025 for all four boroughs (Manhattan, Brooklyn, Queens, Bronx). 
-         These values are used to generate X-charts and MR-charts."
-        )
-      ),
-      p(
-        "If you update the CSV files inside the ", tags$b("sixsigma_pre/"),
-        " folder, the dashboard automatically refreshes all visualizations upon re-running the app."
-      ),
-      br(),
-      
-      h3("Background & Motivation"),
-      p("Congestion Pricing is expected to reduce vehicle traffic in Manhattan and encourage greater use of public transit. 
-       Understanding whether this shift materially affects subway ridership is crucial for estimating operational impacts, revenue implications, and downstream effects on transportation equity."),
-      p("This dashboard combines spatial visualization with Statistical Process Control (SPC) to:"),
-      tags$ul(
-        tags$li("Detect significant changes in borough-wide ridership patterns over time."),
-        tags$li("Identify stations with special-cause variation under 2-sigma and 3-sigma SPC rules."),
-        tags$li("Quantify financial impacts using estimated loss models."),
-        tags$li("Communicate findings using clear visuals for non-technical stakeholders.")
-      ),
-      br(),
-      
-      h3("Source Code & Repository"),
-      p("All code, data files, and documentation for this dashboard are available on GitHub:"),
-      tags$a(
-        "NYC Subway SPC Dashboard Repository",
-        href   = "https://github.com/Selenamiaooo/5300allabouta",
-        target = "_blank"
-      ),
-      br(), br(),
-      
-      h3("SPC Methodology"),
-      p("The dashboard implements standard SPC procedures to assess special-cause variation in subway ridership."),
-      tags$img(
-        src   = "control_tests.png",
-        style = "max-width: 100%; height: auto; margin-bottom: 10px;"
-      ),
-      tags$small(
-        "Figure 1. The eight visual SPC tests used to evaluate stability and detect special-cause patterns. We cited this figure from ",
+        p(
+          "If you update the CSV files inside the ", tags$b("sixsigma_pre/"),
+          " folder, the dashboard automatically refreshes all visualizations upon re-running the app."
+        ),
+        br(),
+        
+        # ---- Executive Summary ----
+        h3("Executive Summary"),
+        p("
+This dashboard evaluates the early impact of New York City's 2025 congestion pricing policy 
+on subway ridership stability across the four major boroughs. Using Statistical Process Control (SPC), 
+we compare monthly ridership patterns before and after policy implementation and detect significant 
+deviations—special-cause variation—across the network.
+"),
+        p("Our analysis reveals three main findings:"),
+        tags$ul(
+          tags$li("Systemwide financial loss from instability decreased by 97.5%. 
+                   Below-LCL loss dropped from $11.7M in 2024 to $0.29M in 2025, 
+                   indicating improved stability in monthly ridership and reduced unpredictability 
+                   in fare-related revenue."),
+          tags$li("Network-wide instability diminished substantially. 
+                   The number of stations violating 2-sigma SPC rules declined from 62 to 24, 
+                   showing that moderate fluctuations became less common after congestion pricing."),
+          tags$li("High-severity instability became more spatially concentrated. 
+                   Stations violating 3-sigma rules rose from 4 to 6, all near major CBD hubs, 
+                   suggesting that extreme variation is now focused at a small set of high-impact stations.")
+        ),
+        p("
+These findings indicate that congestion pricing not only reduces private car usage, 
+but also promotes overall subway system stability while concentrating operational pressure 
+on a few critical nodes. The dashboard integrates geospatial mapping, SPC diagnostics, 
+and station classification to support policy evaluation and resource prioritization.
+"),
+        br(),
+        
+        # ---- Background & Motivation ----
+        h3("Background & Motivation"),
+        p("Congestion Pricing is expected to reduce vehicle traffic in Manhattan and encourage greater use of public transit. 
+           Understanding whether this shift materially affects subway ridership is crucial for estimating operational impacts, revenue implications, and downstream effects on transportation equity."),
+        p("This dashboard combines spatial visualization with Statistical Process Control (SPC) to:"),
+        tags$ul(
+          tags$li("Detect significant changes in borough-wide ridership patterns over time."),
+          tags$li("Identify stations with special-cause variation under 2-sigma and 3-sigma SPC rules."),
+          tags$li("Quantify financial impacts using estimated loss models."),
+          tags$li("Communicate findings using clear visuals for non-technical stakeholders.")
+        ),
+        br(),
+        
+        # ---- Key Quantities of Interest ----
+        h3("Key Quantities of Interest"),
+        tags$ul(
+          tags$li("Systemwide loss decreased from $11.7M (2024) to $0.29M (2025), a 97.5% reduction."),
+          tags$li("Stations violating 2-sigma SPC rules reduced from 62 (2024) to 24 (2025)."),
+          tags$li("Stations violating 3-sigma SPC rules increased from 4 to 6, indicating concentrated instability near CBD hubs.")
+        ),
+        br(),
+        
+        h3("Source Code & Repository"),
+        p("All code, data files, and documentation for this dashboard are available on GitHub:"),
         tags$a(
-          "Slide 11 Lesson 5",
-          href   = "https://docs.google.com/presentation/d/1d8PyyVBTx7FPnq05NzGM1_6AxN48y5EGS8bKh9p2MLw/edit?usp=sharing",
+          "NYC Subway SPC Dashboard Repository",
+          href   = "https://github.com/Selenamiaooo/5300allabouta",
           target = "_blank"
         ),
-        "."
-      ),
-      br(), br(),
-      
-      tags$ul(
-        tags$li("We compute X-charts using monthly ridership totals for each borough."),
-        tags$li("Moving Range (MR) charts are constructed using |X_t − X_{t−1}|."),
-        tags$li("Center lines and control limits (UCL and LCL) for X-charts come from mean and MR-based variability estimates."),
-        tags$li("MR control limits follow the formula: UCL = 3.268 × mean(MR), LCL = 0."),
-        tags$li("We apply all eight SPC visual rules to classify special-cause variation.")
-      ),
-      
-      p(tags$b("Station classification is defined as follows:")),
-      tags$ul(
-        tags$li(tags$b("Core station:"), " violates 3-sigma limits and shows persistent special-cause signals."),
-        tags$li(tags$b("Secondary station:"), " violates only 2-sigma limits but shows moderate instability."),
-        tags$li(tags$b("Stable station:"), " shows no SPC rule violations.")
-      ),
-      br(),
-      
-      h3("Interpreting Results"),
-      tags$ul(
-        tags$li("Hover over X-chart or MR-chart points to view borough, month, ridership values, and stability classification."),
-        tags$li("On the map, station markers indicate instability severity using color-coded categories."),
-        tags$li("Loss values represent estimated financial impact based on deviation below expected ridership baselines."),
-        tags$li("Borough summaries provide counts of Core, Secondary, and Stable stations and total loss estimates.")
-      ),
-      br(),
-      
-      h3("Sources & References"),
-      tags$ul(
-        tags$li(
-          tags$b("MTA Open Data Program: "),
-          "Official open-data portal managed by the MTA Data & Analytics team, which aggregates internal transit performance and ridership datasets and publishes them for public use. ",
+        br(), br(),
+        
+        h3("SPC Methodology"),
+        p("The dashboard implements standard SPC procedures to assess special-cause variation in subway ridership."),
+        tags$img(
+          src   = "control_tests.png",
+          style = "max-width: 100%; height: auto; margin-bottom: 10px;"
+        ),
+        tags$small(
+          "Figure 1. The eight visual SPC tests used to evaluate stability and detect special-cause patterns. We cited this figure from ",
           tags$a(
-            "https://www.mta.info/open-data",
-            href   = "https://www.mta.info/open-data",
+            "Slide 11 Lesson 5",
+            href   = "https://docs.google.com/presentation/d/1d8PyyVBTx7FPnq05NzGM1_6AxN48y5EGS8bKh9p2MLw/edit?usp=sharing",
             target = "_blank"
+          ),
+          "."
+        ),
+        br(), br(),
+        
+        tags$ul(
+          tags$li("We compute X-charts using monthly ridership totals for each borough."),
+          tags$li("Moving Range (MR) charts are constructed using |X_t − X_{t−1}|."),
+          tags$li("Center lines and control limits (UCL and LCL) for X-charts come from mean and MR-based variability estimates."),
+          tags$li("MR control limits follow the formula: UCL = 3.268 × mean(MR), LCL = 0."),
+          tags$li("We apply all eight SPC visual rules to classify special-cause variation.")
+        ),
+        
+        # ---- CI Explanation ----
+        h3("Interpreting SPC Limits as Confidence Intervals"),
+        p("In SPC, control limits function similarly to statistical confidence intervals:"),
+        tags$ul(
+          tags$li("2-sigma limits approximate a 95% confidence interval."),
+          tags$li("3-sigma limits approximate a 99.7% confidence interval.")
+        ),
+        p("
+Months falling outside these limits represent statistically significant deviations from expected patterns 
+and are classified as special-cause variation. These thresholds are also used to calculate Below-LCL loss 
+and classify stations as Core, Secondary, or Stable.
+"),
+        br(),
+        
+        h3("Interpreting Results"),
+        tags$ul(
+          tags$li("Hover over X-chart or MR-chart points to view borough, month, ridership values, and stability classification."),
+          tags$li("On the map, station markers indicate instability severity using color-coded categories."),
+          tags$li("Loss values represent estimated financial impact based on deviation below expected ridership baselines."),
+          tags$li("Borough summaries provide counts of Core, Secondary, and Stable stations and total loss estimates.")
+        ),
+        br(),
+        
+        h3("Sources & References"),
+        tags$ul(
+          tags$li(
+            tags$b("MTA Open Data Program: "),
+            "Official open-data portal managed by the MTA Data & Analytics team, which aggregates internal transit performance and ridership datasets and publishes them for public use. ",
+            tags$a(
+              "https://www.mta.info/open-data",
+              href   = "https://www.mta.info/open-data",
+              target = "_blank"
+            )
+          ),
+          tags$li(
+            tags$b("MTA Daily Ridership Data: 2020–2025: "),
+            "Systemwide daily ridership and traffic estimates for subways (including the Staten Island Railway), buses, commuter rail, and bridges and tunnels, with comparisons to pre-pandemic baselines. This dataset is used in our preprocessing to understand network-level demand shifts around congestion pricing.",
+            tags$br(),
+            tags$a(
+              "https://data.ny.gov/Transportation/MTA-Daily-Ridership-Data-2020-2025/vxuj-8kew/about_data",
+              href   = "https://data.ny.gov/Transportation/MTA-Daily-Ridership-Data-2020-2025/vxuj-8kew/about_data",
+              target = "_blank"
+            )
+          ),
+          tags$li(
+            tags$b("MTA Subway Hourly Ridership: Beginning February 2022: "),
+            "Hourly ridership estimates by subway station complex and fare payment class. This fine-grained dataset underlies the station-level SPC analysis and the Core/Secondary/Stable classification used in this dashboard.",
+            tags$br(),
+            tags$a(
+              "https://catalog.data.gov/dataset/mta-subway-hourly-ridership-beginning-february-2022",
+              href   = "https://catalog.data.gov/dataset/mta-subway-hourly-ridership-beginning-february-2022",
+              target = "_blank"
+            )
           )
         ),
-        tags$li(
-          tags$b("MTA Daily Ridership Data: 2020–2025: "),
-          "Systemwide daily ridership and traffic estimates for subways (including the Staten Island Railway), buses, commuter rail, and bridges and tunnels, with comparisons to pre-pandemic baselines. This dataset is used in our preprocessing to understand network-level demand shifts around congestion pricing.",
-          tags$br(),
-          tags$a(
-            "https://data.ny.gov/Transportation/MTA-Daily-Ridership-Data-2020-2025/vxuj-8kew/about_data",
-            href   = "https://data.ny.gov/Transportation/MTA-Daily-Ridership-Data-2020-2025/vxuj-8kew/about_data",
-            target = "_blank"
-          )
+        br(),
+        
+        h3("Authors & Contributors"),
+        p("Developed by graduate students in the Cornell Systems Engineering program:"),
+        tags$ul(
+          tags$li("Luyao Chang – Cornell Systems Engineering ’25"),
+          tags$li("Yueqing Miao – Cornell Systems Engineering ’26"),
+          tags$li("Kegan Lin – Cornell Systems Engineering ’26"),
+          tags$li("Jack Zhou – Cornell Systems Engineering ’26"),
+          tags$li("Laura Liu – Cornell Systems Engineering ’25")
         ),
-        tags$li(
-          tags$b("MTA Subway Hourly Ridership: Beginning February 2022: "),
-          "Hourly ridership estimates by subway station complex and fare payment class. This fine-grained dataset underlies the station-level SPC analysis and the Core/Secondary/Stable classification used in this dashboard.",
-          tags$br(),
-          tags$a(
-            "https://catalog.data.gov/dataset/mta-subway-hourly-ridership-beginning-february-2022",
-            href   = "https://catalog.data.gov/dataset/mta-subway-hourly-ridership-beginning-february-2022",
-            target = "_blank"
-          )
-        )
-      ),
-      br(),
-      
-      h3("Authors & Contributors"),
-      p("Developed by graduate students in the Cornell Systems Engineering program:"),
-      tags$ul(
-        tags$li("Luyao Chang – Cornell Systems Engineering ’25"),
-        tags$li("Yueqing Miao – Cornell Systems Engineering ’26"),
-        tags$li("Kegan Lin – Cornell Systems Engineering ’26"),
-        tags$li("Jack Zhou – Cornell Systems Engineering ’26"),
-        tags$li("Laura Liu – Cornell Systems Engineering ’25")
-      ),
-      br(),
-      
-      h3("Acknowledgements"),
-      p("We thank the NYC MTA for providing open ridership datasets, and the Cornell Six Sigma teaching team for guidance on SPC methodology. 
-       This dashboard was created for academic and educational use only.")
+        br(),
+        
+        h3("Acknowledgements"),
+        p("We thank the NYC MTA for providing open ridership datasets, and the Cornell Six Sigma teaching team for guidance on SPC methodology. 
+           This dashboard was created for academic and educational use only.")
+      )
     )
   )
 )
@@ -381,7 +452,6 @@ server <- function(input, output, session) {
     paste0("⚪ Stable Station: ", n)
   })
   
-  
   output$loss_direction <- renderText({
     df <- filtered_stations()
     total_loss <- sum(df$loss, na.rm = TRUE)
@@ -417,6 +487,18 @@ server <- function(input, output, session) {
     borough_spc %>%
       filter(region == input$region_borough) %>%
       arrange(month_date)
+  })
+  
+  # Latest month summary
+  output$latest_month_info <- renderText({
+    df <- region_spc_data()
+    req(nrow(df) > 0)
+    latest <- df[nrow(df), ]
+    paste0(
+      "Latest month: ", latest$month_label,
+      " — Total ridership: ", scales::comma(latest$total_ridership),
+      " — Moving range: ", scales::comma(latest$MR)
+    )
   })
   
   # Interactive X Chart (time axis)
@@ -470,8 +552,11 @@ server <- function(input, output, session) {
       ) +
       theme_minimal(base_size = 12) +
       theme(
-        axis.text.x = element_text(angle = 45, hjust = 1),
-        plot.title  = element_text(hjust = 0.5, face = "bold")
+        panel.background = element_rect(fill = "white"),
+        panel.grid.major = element_line(color = "grey85"),
+        panel.grid.minor = element_line(color = "grey92"),
+        axis.text.x      = element_text(angle = 45, hjust = 1),
+        plot.title       = element_text(hjust = 0.5, face = "bold")
       )
     
     ggplotly(p, tooltip = "text")
@@ -514,8 +599,11 @@ server <- function(input, output, session) {
       ) +
       theme_minimal(base_size = 12) +
       theme(
-        axis.text.x = element_text(angle = 45, hjust = 1),
-        plot.title  = element_text(hjust = 0.5, face = "bold")
+        panel.background = element_rect(fill = "white"),
+        panel.grid.major = element_line(color = "grey85"),
+        panel.grid.minor = element_line(color = "grey92"),
+        axis.text.x      = element_text(angle = 45, hjust = 1),
+        plot.title       = element_text(hjust = 0.5, face = "bold")
       )
     
     ggplotly(p, tooltip = "text")
